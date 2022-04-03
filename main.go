@@ -21,8 +21,10 @@ func main () {
 }
 
 func doStart () {
-        if isCellRunning() {
-                fmt.Println("(i)", options.cell, "is already running")
+        pid, running := isCellRunning()
+        if running {
+                fmt.Println (
+                        "(i)", options.cell, "is already running with pid", pid)
                 os.Exit(1)
         }
 
@@ -44,11 +46,9 @@ func doStart () {
 }
 
 func doStop () {
-        pid, err := getCellPid()
-        if err != nil {
-                fmt.Println (
-                        "ERR could not read pidfile of",
-                        options.cell + ":", err)
+        pid, running := isCellRunning()
+        if !running {
+                fmt.Println("ERR cell", options.cell, "is not running")
                 os.Exit(1)
         }
 
@@ -66,17 +66,21 @@ func doRestart () {
 }
 
 func doStatus () {
-        pid, err := getCellPid()
+        uid, gid, err := getCellUid()
         if err != nil {
                 fmt.Println (
-                        "ERR could not read pidfile of",
-                        options.cell + ":", err)
+                        "ERR cell", options.cell, "does not exist")
                 os.Exit(1)
         }
 
+        pid, running := isCellRunning()
+
         fmt.Println("(i) cell", options.cell + ":")
-        fmt.Println("- pid:    ", pid)
-        fmt.Println("- running:", isCellRunning())
+        fmt.Println("- running:", running)
+        if running {
+        fmt.Println("- pid:    ", pid)}
+        fmt.Println("- uid:    ", uid)
+        fmt.Println("- gid:    ", gid)
 }
 
 func getCellPid () (pid int, err error) {
@@ -87,14 +91,14 @@ func getCellPid () (pid int, err error) {
         return pid, nil
 }
 
-func isCellRunning () (running bool) {
+func isCellRunning () (pid int, running bool) {
         pid, err := getCellPid()
-        if err != nil { return false }
+        if err != nil { return pid, false }
         process, err := os.FindProcess(pid)
-        if err != nil { return false }
+        if err != nil { return pid, false }
         err = process.Signal(syscall.Signal(0))
-        if err != nil { return false }
-        return true
+        if err != nil { return pid, false }
+        return pid, true
 }
 
 func getCellUid () (uid uint32, gid uint32, err error) {

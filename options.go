@@ -18,6 +18,7 @@ func ParseArgs () {
         startCommand   := parser.NewCommand("start",   "Start a cell")
         stopCommand    := parser.NewCommand("stop",    "Stop a cell")
         restartCommand := parser.NewCommand("restart", "Restart a cell")
+        statusCommand  := parser.NewCommand("status",  "Display cell status")
         
         pidfile := parser.String ("p", "pidfile", &argparse.Options {
                 Required: false,
@@ -50,5 +51,7 @@ func ParseArgs () {
                 doStop()
         } else if restartCommand.Happened() {
                 doRestart()
+        } else if statusCommand.Happened() {
+                doStatus()
         }
 }

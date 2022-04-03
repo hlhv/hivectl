@@ -65,6 +65,20 @@ func doRestart () {
         doStart()
 }
 
+func doStatus () {
+        pid, err := getCellPid()
+        if err != nil {
+                fmt.Println (
+                        "ERR could not read pidfile of",
+                        options.cell + ":", err)
+                os.Exit(1)
+        }
+
+        fmt.Println("(i) cell", options.cell + ":")
+        fmt.Println("- pid:    ", pid)
+        fmt.Println("- running:", isCellRunning())
+}
+
 func getCellPid () (pid int, err error) {
         content, err := ioutil.ReadFile(options.pidfile)
         if err != nil { return 0, err }

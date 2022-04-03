@@ -19,6 +19,7 @@ In order for this tool to work, each cell must:
 - `start`: Start a cell
 - `stop`: Stop a cell
 - `restart`: Restart a cell
+- `status`: Display cell status
 
 ### Arguments
 

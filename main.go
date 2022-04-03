@@ -76,8 +76,10 @@ func getCellPid () (pid int, err error) {
 func isCellRunning () (running bool) {
         pid, err := getCellPid()
         if err != nil { return false }
-        _, err = os.FindProcess(pid)
-        if err == nil { return false }
+        process, err := os.FindProcess(pid)
+        if err != nil { return false }
+        err = process.Signal(syscall.Signal(0))
+        if err != nil { return false }
         return true
 }
 

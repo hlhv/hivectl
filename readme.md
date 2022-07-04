@@ -1,5 +1,7 @@
 # hivectl
 
+[![A+ Golang report card.](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat)](https://goreportcard.com/report/github.com/hlhv/hivectl)
+
 Hivectl provides functionality to start, stop, and restart cells as background
 processes. It automatically handles pidfile creation. It is primarily designed
 for use by init systems. It must be run as root.

@@ -8,8 +8,9 @@ import (
 )
 
 var options struct {
-	pidfile string
-	cell    string
+	pidfile  string
+	cell     string
+	cellName string
 }
 
 func ParseArgs() {
@@ -39,6 +40,7 @@ func ParseArgs() {
 	}
 
 	options.pidfile = *pidfile
+	options.cellName = *cell
 	options.cell = "hlhv-" + *cell
 
 	if options.pidfile == "" {

@@ -163,7 +163,11 @@ func spawnCell() (pid int, err error) {
 		return 0, errors.New("executable does not exist")
 	}
 
-	process, err := os.StartProcess(path, []string{path}, &attr)
+	process, err := os.StartProcess(
+		path, []string{
+			path,
+			"-L", "/var/log/hlhv/" + options.cellName,
+		}, &attr)
 	if err != nil {
 		return 0, err
 	}

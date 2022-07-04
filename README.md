@@ -11,6 +11,7 @@ In order for this tool to work, each cell must:
 - Be an executable located somewhere in root's PATH
 - Be named `hlhv-<cell name>`
 - Have an associated system user of that same name
+- Have full access to a directory called `/var/log/hlhv/<cell name>`
 
 ## Usage
 

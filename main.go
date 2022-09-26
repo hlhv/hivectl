@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"time"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -48,8 +49,8 @@ func doStart() {
 func doStop() {
 	pid, running := isCellRunning()
 	if !running {
-		fmt.Println("ERR cell", options.cell, "is not running")
-		os.Exit(1)
+		fmt.Println("!!! cell", options.cell, "is not running")
+		return
 	}
 
 	process, _ := os.FindProcess(pid)
@@ -57,6 +58,17 @@ func doStop() {
 	if err != nil {
 		fmt.Println("ERR could not kill", options.cell+":", err)
 		os.Exit(1)
+	}
+
+	// wait for the process to exit, with a timeout
+	timeoutPoint := time.Now()
+	for time.Since(timeoutPoint) < 16*time.Second {
+		_, running = isCellRunning()
+		if !running {
+			return
+		}
+		
+		time.Sleep(100*time.Millisecond)
 	}
 }
 

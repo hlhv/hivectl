@@ -1,21 +1,22 @@
 package main
 
-import (
-	"errors"
-	"time"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"os/user"
-	"strconv"
-	"syscall"
-)
+import "errors"
+import "time"
+import "fmt"
+import "io/ioutil"
+import "os"
+import "os/exec"
+import "os/user"
+import "strconv"
+import "syscall"
 
 func main() {
-	ParseArgs()
+	parseArgs()
 }
 
+// needRoot halts the program and displays an error if it is not being run as
+// root. This should be called whenever an operation takes place that requires
+// root privelages.
 func needRoot() {
 	uid := os.Getuid()
 	if uid != 0 {
@@ -24,6 +25,7 @@ func needRoot() {
 	}
 }
 
+// doStart performs a cell start operation.
 func doStart() {
 	pid, running := isCellRunning()
 	if running {
@@ -53,6 +55,8 @@ func doStart() {
 	fmt.Println(pid)
 }
 
+// doStart performs a cell stop operation. It waits until the cell has stopped
+// or a timeout of 16 seconds is reached before returning.
 func doStop() {
 	pid, running := isCellRunning()
 	if !running {
@@ -81,11 +85,13 @@ func doStop() {
 	}
 }
 
+// doRestart performs a cell restart operation.
 func doRestart() {
 	doStop()
 	doStart()
 }
 
+// doStatus performs a cell status get operation.
 func doStatus() {
 	uid, gid, err := getCellUid()
 	if err != nil {
@@ -106,7 +112,10 @@ func doStatus() {
 	fmt.Println("- gid:    ", gid)
 }
 
+// getCellPid returns the pid of the cell being operated on.
 func getCellPid() (pid int, err error) {
+	// TODO: call isCellRunning before continuing to make sure we don't read
+	// a random pid
 	content, err := ioutil.ReadFile(options.pidfile)
 	if err != nil {
 		return 0, err
@@ -118,6 +127,8 @@ func getCellPid() (pid int, err error) {
 	return pid, nil
 }
 
+// isCellRunning checks to see if the cell that is being operated on is
+// currently running.
 func isCellRunning() (pid int, running bool) {
 	pid, err := getCellPid()
 	if err != nil {
@@ -148,6 +159,8 @@ func isCellRunning() (pid int, running bool) {
 	return
 }
 
+// getCellUid returns the user id and group id of the cell currently being
+// operated on.
 func getCellUid() (uid uint32, gid uint32, err error) {
 	user, err := user.Lookup(options.cell)
 	if err != nil {
@@ -165,6 +178,8 @@ func getCellUid() (uid uint32, gid uint32, err error) {
 	return uint32(puid), uint32(pgid), nil
 }
 
+// spawnCell starts the cell that is currently being operated on, and detatches
+// it.
 func spawnCell() (pid int, err error) {
 	needRoot()
 	uid, gid, err := getCellUid()

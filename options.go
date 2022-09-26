@@ -7,13 +7,16 @@ import (
 	"github.com/akamensky/argparse"
 )
 
+// options holds user-specified information about how to carry out the current
+// operation.
 var options struct {
 	pidfile  string
 	cell     string
 	cellName string
 }
 
-func ParseArgs() {
+// parseArgs parses command line arguments for the cell.
+func parseArgs() {
 	parser := argparse.NewParser("", "HLHV cell controller")
 
 	startCommand := parser.NewCommand("start", "Start a cell")
@@ -24,7 +27,7 @@ func ParseArgs() {
 	pidfile := parser.String("p", "pidfile", &argparse.Options{
 		Required: false,
 		Help: "Specify the location the pidfile. Defaults to a " +
-			"file named hlhv-<cell name>.pid located at /run",
+			"file named hlhv-<cell name>.pid located at /run/",
 	})
 
 	cell := parser.String("c", "cell", &argparse.Options{

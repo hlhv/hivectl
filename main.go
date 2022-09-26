@@ -19,7 +19,7 @@ func main() {
 func needRoot() {
 	uid := os.Getuid()
 	if uid != 0 {
-		fmt.Println("ERR this utility must be run as root")
+		fmt.Fprintln(os.Stderr, "ERR this utility must be run as root")
 		os.Exit(1)
 	}
 }
@@ -27,20 +27,24 @@ func needRoot() {
 func doStart() {
 	pid, running := isCellRunning()
 	if running {
-		fmt.Println(
+		fmt.Fprintln(
+			os.Stderr,
 			"(i)", options.cell, "is already running with pid", pid)
 		os.Exit(1)
 	}
 
 	pid, err := spawnCell()
 	if err != nil {
-		fmt.Println("ERR could not start", options.cell+":", err)
+		fmt.Fprintln(
+			os.Stderr,
+			"ERR could not start", options.cell+":", err)
 		os.Exit(1)
 	}
 
 	err = ioutil.WriteFile(options.pidfile, []byte(strconv.Itoa(pid)), 0644)
 	if err != nil {
-		fmt.Println(
+		fmt.Fprintln(
+			os.Stderr,
 			"ERR could not write pidfile of",
 			options.cell+":", err)
 		os.Exit(1)
@@ -59,7 +63,9 @@ func doStop() {
 	process, _ := os.FindProcess(pid)
 	err := process.Kill()
 	if err != nil {
-		fmt.Println("ERR could not kill", options.cell+":", err)
+		fmt.Fprintln(
+			os.Stderr,
+			"ERR could not kill", options.cell+":", err)
 		os.Exit(1)
 	}
 
@@ -83,7 +89,8 @@ func doRestart() {
 func doStatus() {
 	uid, gid, err := getCellUid()
 	if err != nil {
-		fmt.Println(
+		fmt.Fprintln(
+			os.Stderr,
 			"ERR cell", options.cell, "does not exist")
 		os.Exit(1)
 	}

@@ -13,12 +13,15 @@ import (
 )
 
 func main() {
+	ParseArgs()
+}
+
+func needRoot() {
 	uid := os.Getuid()
 	if uid != 0 {
 		fmt.Println("ERR this utility must be run as root")
 		os.Exit(1)
 	}
-	ParseArgs()
 }
 
 func doStart() {
@@ -111,17 +114,31 @@ func getCellPid() (pid int, err error) {
 func isCellRunning() (pid int, running bool) {
 	pid, err := getCellPid()
 	if err != nil {
-		return pid, false
+		return
 	}
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return pid, false
+	
+	directoryInfo, err := os.Stat("/proc/")
+	if os.IsNotExist(err) || !directoryInfo.IsDir() {
+		// if /proc/ does not exist, fallback to sending a signal
+		needRoot()
+		process, err := os.FindProcess(pid)
+		if err != nil {
+			return
+		}
+		err = process.Signal(syscall.Signal(0))
+		if err != nil {
+			return
+		}
+	} else {
+		// if /proc/ exists, see if the process's directory exists there
+		_, err = os.Stat("/proc/" + strconv.Itoa(pid))
+		if err != nil {
+			return
+		}
 	}
-	err = process.Signal(syscall.Signal(0))
-	if err != nil {
-		return pid, false
-	}
-	return pid, true
+
+	running = true
+	return
 }
 
 func getCellUid() (uid uint32, gid uint32, err error) {
@@ -142,6 +159,7 @@ func getCellUid() (uid uint32, gid uint32, err error) {
 }
 
 func spawnCell() (pid int, err error) {
+	needRoot()
 	uid, gid, err := getCellUid()
 	if err != nil {
 		return 0, errors.New("user does not exist")
